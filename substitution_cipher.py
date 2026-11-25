@@ -1,117 +1,70 @@
-# ==========================================
-# SUBSTITUTION CIPHER
-# Python 3 - Encryption and Decryption
-# ==========================================
-
-
-# Standard alphabet
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+KEY      = "QWERTYUIOPASDFGHJKLZXCVBNM"
 
-# Substitution key.
-# Each position in KEY corresponds to the same
-# position in ALPHABET.
-KEY = "QWERTYUIOPASDFGHJKLZXCVBNM"
-
-
-def validate_key(key):
-    """
-    Validate that the substitution key contains
-    all 26 letters of the English alphabet exactly once.
-    """
-
-    # Convert the key to uppercase so the internal
-    # representation is always consistent.
-    key = key.upper()
-
-    # A substitution alphabet must contain 26 characters.
-    if len(key) != 26:
-        raise ValueError(
-            "Key must contain exactly 26 letters."
-        )
-
-    # The key must contain every letter A-Z exactly once.
-    if set(key) != set(ALPHABET):
-        raise ValueError(
-            "Key must contain every letter A-Z exactly once."
-        )
-
-    return key
+# Lookup tables, built once.
+# zip() pairs up the two strings letter by letter: ('A','Q'), ('B','W'), ...
+ENCRYPT_MAP = dict(zip(ALPHABET, KEY))   # {'A': 'Q', 'B': 'W', ...}
+DECRYPT_MAP = dict(zip(KEY, ALPHABET))   # {'Q': 'A', 'W': 'B', ...}
 
 
-def substitution_encrypt(text, key):
-    """
-    Encrypt text using a monoalphabetic substitution cipher.
-    Uppercase and lowercase letters are preserved.
-    Spaces, numbers, and punctuation remain unchanged.
-    """
+def substitute(text, mapping):
+    """Replace each letter using the given lookup table."""
 
-    key = validate_key(key)
-    result = []
+    result = ""
 
     for char in text:
+        upper = char.upper()
 
-        # Handle uppercase letters
-        if 'A' <= char <= 'Z':
-            index = ord(char) - ord('A')
-            result.append(key[index])
-
-        # Handle lowercase letters
-        elif 'a' <= char <= 'z':
-            index = ord(char) - ord('a')
-            result.append(key[index].lower())
-
-        # Leave spaces, numbers, and punctuation unchanged
+        if upper in mapping:
+            new_char = mapping[upper]
+            # Keep the original letter case
+            result += new_char if char.isupper() else new_char.lower()
         else:
-            result.append(char)
+            # Keep spaces, numbers, punctuation unchanged
+            result += char
 
-    return ''.join(result)
-
-
-def substitution_decrypt(text, key):
-    """
-    Decrypt text using the reverse of the substitution key.
-    Uppercase and lowercase letters are preserved.
-    Spaces, numbers, and punctuation remain unchanged.
-    """
-
-    key = validate_key(key)
-
-    # Build the reverse mapping:
-    # substituted letter -> original letter
-    reverse = {}
-
-    for i in range(26):
-        reverse[key[i]] = ALPHABET[i]
-
-    result = []
-
-    for char in text:
-
-        # Handle uppercase letters
-        if 'A' <= char <= 'Z':
-            result.append(reverse[char])
-
-        # Handle lowercase letters
-        elif 'a' <= char <= 'z':
-            result.append(reverse[char.upper()].lower())
-
-        # Leave spaces, numbers, and punctuation unchanged
-        else:
-            result.append(char)
-
-    return ''.join(result)
+    return result
 
 
 # ==========================================
-# TEST THE SUBSTITUTION CIPHER
+# USER INTERACTION
 # ==========================================
-
-message = "Tehillah"
-
-encrypted = substitution_encrypt(message, KEY)
-decrypted = substitution_decrypt(encrypted, KEY)
 
 print("=== SUBSTITUTION CIPHER ===")
-print("Original :", message)
-print("Encrypted:", encrypted)
-print("Decrypted:", decrypted)
+
+while True:
+    choice = input("\nEncrypt or Decrypt? (e/d, or q to quit): ").lower()
+
+    if choice == 'q':
+        print("Goodbye!")
+        break
+
+    if choice not in ('e', 'd'):
+        print("Please enter 'e', 'd', or 'q'.")
+        continue
+
+    message = input("Enter your message: ")
+
+    if choice == 'e':
+        print("Encrypted:", substitute(message, ENCRYPT_MAP))
+    else:
+        print("Decrypted:", substitute(message, DECRYPT_MAP))
+
+
+
+
+
+
+'''=== SAMPLE RUNS ===
+
+Encrypt or Decrypt? (e/d, or q to quit): e
+Enter your message: Tehillah
+Encrypted: Ztiossqi
+
+Encrypt or Decrypt? (e/d, or q to quit): d
+Enter your message: Ztiossqi
+Decrypted: Tehillah
+
+Encrypt or Decrypt? (e/d, or q to quit): e
+Enter your message: Hello, World!
+Encrypted: Itssg, Vgksr!                        '''

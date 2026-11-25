@@ -1,70 +1,54 @@
-# ==========================================
-# CAESAR CIPHER
-# Python 3 - Encryption and Decryption
-# ==========================================
-
-
 def caesar_cipher(text, shift, decrypt=False):
-    """
-    Encrypt or decrypt text using the Caesar Cipher.
+    """Encrypt or decrypt text using the Caesar Cipher."""
 
-    Parameters:
-        text (str): The message to process.
-        shift (int): Number of positions to shift.
-        decrypt (bool): If True, reverse the shift for decryption.
-
-    Returns:
-        str: The encrypted or decrypted message.
-    """
-
-    # Reverse the shift when decrypting.
+    # Decrypting means shifting in the opposite direction
     if decrypt:
         shift = -shift
 
-    # Store the processed characters here.
-    result = []
+    result = ""
 
-    # Process each character in the message.
     for char in text:
+        if char.isalpha():
+            # Pick the starting point depending on upper or lower case
+            base = ord('A') if char.isupper() else ord('a')
 
-        # Handle uppercase letters (A-Z).
-        if 'A' <= char <= 'Z':
-            base = ord('A')
-            shifted_char = chr(
-                (ord(char) - base + shift) % 26 + base
-            )
-            result.append(shifted_char)
-
-        # Handle lowercase letters (a-z).
-        elif 'a' <= char <= 'z':
-            base = ord('a')
-            shifted_char = chr(
-                (ord(char) - base + shift) % 26 + base
-            )
-            result.append(shifted_char)
-
-        # Keep spaces, numbers, and punctuation unchanged.
+            # Position in alphabet (0-25), shift it, wrap with % 26, convert back
+            new_position = (ord(char) - base + shift) % 26
+            result += chr(new_position + base)
         else:
-            result.append(char)
+            # Keep spaces, numbers, punctuation unchanged
+            result += char
 
-    # Convert the list of characters back into a string.
-    return ''.join(result)
+    return result
 
 
 # ==========================================
-# TEST THE CAESAR CIPHER
+# USER INTERACTION
 # ==========================================
-
-message = "cryptology"
-shift = 3
-
-# Encrypt the message.
-encrypted = caesar_cipher(message, shift)
-
-# Decrypt the encrypted message.
-decrypted = caesar_cipher(encrypted, shift, decrypt=True)
 
 print("=== CAESAR CIPHER ===")
-print("Original :", message)
-print("Encrypted:", encrypted)
-print("Decrypted:", decrypted)
+
+while True:
+    choice = input("\nEncrypt or Decrypt? (e/d, or q to quit): ").lower()
+
+    if choice == 'q':
+        print("Goodbye!")
+        break
+
+    if choice not in ('e', 'd'):
+        print("Please enter 'e', 'd', or 'q'.")
+        continue
+
+    message = input("Enter your message: ")
+
+    # Make sure the shift is a valid whole number
+    try:
+        shift = int(input("Enter the shift value (e.g. 3): "))
+    except ValueError:
+        print("Shift must be a whole number.")
+        continue
+
+    if choice == 'e':
+        print("Encrypted:", caesar_cipher(message, shift))
+    else:
+        print("Decrypted:", caesar_cipher(message, shift, decrypt=True))
